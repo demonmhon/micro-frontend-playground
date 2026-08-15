@@ -1,0 +1,20 @@
+{
+  "name": "micro-frontend-playground",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"HOST,DASHBOARD,ORDERS\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold\" \"npm run dev:host\" \"npm run dev:dashboard\" \"npm run dev:orders\"",
+    "dev:host": "npm run dev --workspace=@playground/host",
+    "dev:dashboard": "npm run dev --workspace=@playground/remote-dashboard",
+    "dev:orders": "npm run dev --workspace=@playground/remote-orders",
+    "build": "npm run build --workspaces",
+    "preview": "concurrently -n \"HOST,DASHBOARD,ORDERS\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold\" \"npm run preview --workspace=@playground/host\" \"npm run preview --workspace=@playground/remote-dashboard\" \"npm run preview --workspace=@playground/remote-orders\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}
