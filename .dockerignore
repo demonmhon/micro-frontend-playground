@@ -1,0 +1,10 @@
+node_modules
+dist
+apps/*/dist
+apps/*/node_modules
+.git
+.agents
+.gemini
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

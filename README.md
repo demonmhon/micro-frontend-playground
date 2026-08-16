@@ -83,15 +83,30 @@ npm run dev:dashboard:standalone # Team Alpha standalone dev server
 npm run dev:orders:standalone    # Team Beta standalone dev server
 ```
 
-### 3. Build for Production
+### 3. Build for Production (Unified All-in-One)
 ```bash
 npm run build
 ```
+This builds Host and Remotes and automatically merges them into a consolidated `./dist` folder:
+- `dist/index.html` & `dist/assets/` (Host Shell)
+- `dist/remotes/dashboard/` (Team Alpha Dashboard)
+- `dist/remotes/orders/` (Team Beta Orders)
 
-### 4. Preview Production Builds
+### 4. Preview Unified Production Build
+Run the single-port static preview server (with SPA client-side routing and CORS headers):
 ```bash
-npm run preview
+npm run serve
+# Or: npm run preview:unified
 ```
+Open **http://localhost:3000** to test the complete production artifact on a single port.
+
+### 5. Deploy with Docker
+Build and run the production-ready Nginx container:
+```bash
+docker build -t micro-frontend-playground .
+docker run -p 8080:80 micro-frontend-playground
+```
+Access the application at **http://localhost:8080**.
 
 ---
 

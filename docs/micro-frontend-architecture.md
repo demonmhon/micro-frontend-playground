@@ -356,3 +356,26 @@ export class RemoteErrorBoundary extends Component<Props, State> {
 2. **Pure CSS & CSS Variables**: Share design tokens via CSS variables rather than heavyweight component libraries, preserving team autonomy and fast build times.
 3. **Internal Sub-Routing with Relative Paths**: Use relative route links (`navigate('create')`, `navigate('..')`) inside remotes so they function properly whether mounted at `/orders/*` in the Host Shell or `/*` in Standalone mode.
 4. **Fault Isolation by Default**: Always wrap remote federated components in an ErrorBoundary to prevent cascading failures across micro-apps.
+
+---
+
+## 8. Production Deployment Strategies
+
+### Strategy A: Independent Team Pipelines (Decoupled CDNs)
+In high-scale organizations with autonomous teams, each micro-frontend has its own CI/CD repository/pipeline and deploys to its own CDN bucket:
+- **Host Shell**: Deployed to `https://app.example.com`
+- **Dashboard Remote**: Deployed to `https://dashboard.cdn.example.com` (serving `remoteEntry.js`)
+- **Orders Remote**: Deployed to `https://orders.cdn.example.com` (serving `remoteEntry.js`)
+
+The Host imports remotes dynamically via environment variables (`VITE_REMOTE_DASHBOARD_URL`, `VITE_REMOTE_ORDERS_URL`). When Team Alpha updates the dashboard, Host automatically reflects the changes without being rebuilt.
+
+### Strategy B: Unified Monorepo Deployment (All-in-One Artifact)
+When operating out of a single monorepo or deploying to a single container/static hosting provider:
+1. `npm run build` runs across all workspaces.
+2. `scripts/assemble-unified-build.mjs` consolidates the outputs into `./dist`:
+   - `dist/index.html` (Host Shell)
+   - `dist/remotes/dashboard/` (Team Alpha Dashboard)
+   - `dist/remotes/orders/` (Team Beta Orders)
+3. The entire site is served on a single origin with Nginx (`Dockerfile` + `nginx.conf`) or any static hosting service.
+4. All client-side SPA routing (`/dashboard/*`, `/orders/*`) falls back to `dist/index.html`.
+

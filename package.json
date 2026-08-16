@@ -12,10 +12,15 @@
     "dev:orders": "npm run dev --workspace=@playground/remote-orders",
     "dev:dashboard:standalone": "npm run dev:standalone --workspace=@playground/remote-dashboard",
     "dev:orders:standalone": "npm run dev:standalone --workspace=@playground/remote-orders",
-    "build": "npm run build --workspaces",
+    "build": "npm run build:workspaces && node scripts/assemble-unified-build.mjs",
+    "build:workspaces": "npm run build --workspaces",
+    "build:assemble": "node scripts/assemble-unified-build.mjs",
+    "serve": "node scripts/serve-unified.mjs",
+    "preview:unified": "node scripts/serve-unified.mjs",
     "preview": "concurrently -n \"HOST,DASHBOARD,ORDERS\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold\" \"npm run preview --workspace=@playground/host\" \"npm run preview --workspace=@playground/remote-dashboard\" \"npm run preview --workspace=@playground/remote-orders\""
   },
   "devDependencies": {
+    "@types/node": "^26.2.0",
     "concurrently": "^9.1.2",
     "typescript": "^5.7.3"
   }
