@@ -68,15 +68,19 @@ npm install
 ```
 
 ### 2. Run in Development Mode
-Start all applications concurrently (Host + Remotes):
+Start all applications concurrently (Host in dev mode + Remotes in watch/preview mode):
 ```bash
 npm run dev
 ```
+This enables editing any file in Host (instant HMR) or Remotes (auto-rebuilding in ~150ms) and viewing changes at **http://localhost:3000**.
+
 Or run individual micro-apps independently:
 ```bash
-npm run dev:host        # Shell on http://localhost:3000
-npm run dev:dashboard   # Team Alpha on http://localhost:3001
-npm run dev:orders      # Team Beta on http://localhost:3002
+npm run dev:host                 # Shell on http://localhost:3000
+npm run dev:dashboard            # Team Alpha (watch+preview) on http://localhost:3001
+npm run dev:orders               # Team Beta (watch+preview) on http://localhost:3002
+npm run dev:dashboard:standalone # Team Alpha standalone dev server
+npm run dev:orders:standalone    # Team Beta standalone dev server
 ```
 
 ### 3. Build for Production

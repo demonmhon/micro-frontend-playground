@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n \"BUILD,SERVE\" -c \"yellow,cyan\" \"npm run build:watch\" \"npm run preview\"",
     "build": "tsc && vite build",
-    "preview": "vite preview --port 3001"
+    "preview": "vite preview --port 3001",
+    "dev:standalone": "vite",
+    "build:watch": "vite build --watch"
   },
   "dependencies": {
     "react": "^18.3.1",

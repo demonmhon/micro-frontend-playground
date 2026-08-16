@@ -10,6 +10,8 @@
     "dev:host": "npm run dev --workspace=@playground/host",
     "dev:dashboard": "npm run dev --workspace=@playground/remote-dashboard",
     "dev:orders": "npm run dev --workspace=@playground/remote-orders",
+    "dev:dashboard:standalone": "npm run dev:standalone --workspace=@playground/remote-dashboard",
+    "dev:orders:standalone": "npm run dev:standalone --workspace=@playground/remote-orders",
     "build": "npm run build --workspaces",
     "preview": "concurrently -n \"HOST,DASHBOARD,ORDERS\" -c \"bgBlue.bold,bgGreen.bold,bgMagenta.bold\" \"npm run preview --workspace=@playground/host\" \"npm run preview --workspace=@playground/remote-dashboard\" \"npm run preview --workspace=@playground/remote-orders\""
   },
