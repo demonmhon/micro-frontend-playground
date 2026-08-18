@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLocale } from './context/MfeContext';
+import { getDashboardTranslations } from './locales';
 import { eventBus, OrderPayload } from './eventBus';
 import './mfe-styles.css';
 
@@ -10,17 +12,20 @@ interface ActivityItem {
 }
 
 export default function DashboardRoutes() {
+  const { locale } = useLocale();
+  const t = getDashboardTranslations(locale);
+
   const [revenue, setRevenue] = useState(148250);
   const [ordersCount, setOrdersCount] = useState(1284);
   const [activeUsers, setActiveUsers] = useState(3420);
   const [activities, setActivities] = useState<ActivityItem[]>([
-    { id: '1', text: 'System connected to Module Federation runtime', time: 'Just now', type: 'system' }
+    { id: '1', text: t.feed.initItem, time: t.feed.justNow, type: 'system' }
   ]);
   const [shouldCrash, setShouldCrash] = useState(false);
 
   // Demonstrate Fault Isolation / Error Boundary
   if (shouldCrash) {
-    throw new Error('Simulated outage in Dashboard Remote (Port 3001) to verify Host ErrorBoundary.');
+    throw new Error(t.outageError);
   }
 
   // Subscribe to Cross-MFE Events
@@ -31,8 +36,8 @@ export default function DashboardRoutes() {
       setActivities((prev) => [
         {
           id: `act-${Date.now()}`,
-          text: `⚡ Event Received: ${payload.customer} placed order #${payload.orderId} (+$${payload.amount.toFixed(2)})`,
-          time: new Date().toLocaleTimeString(),
+          text: `${t.feed.eventReceived} ${payload.customer} ${t.feed.placedOrder} #${payload.orderId} (+${locale === 'th' ? '฿' : '$'}${payload.amount.toFixed(2)})`,
+          time: new Date().toLocaleTimeString(locale === 'th' ? 'th-TH' : 'en-US'),
           type: 'order'
         },
         ...prev.slice(0, 4)
@@ -40,24 +45,27 @@ export default function DashboardRoutes() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [t, locale]);
+
+  const currencyPrefix = locale === 'th' ? '฿' : '$';
+  const displayRevenue = locale === 'th' ? revenue * 35 : revenue;
 
   return (
     <div className="mfe-boundary mfe-boundary-dashboard" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <span className="mfe-boundary-tag mfe-tag-dashboard">Team Alpha: Dashboard Remote (:3001)</span>
+      <span className="mfe-boundary-tag mfe-tag-dashboard">{t.tag}</span>
 
       {/* Header Bar */}
       <div className="mfe-flex-between" style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
         <div>
           <div className="mfe-flex-gap">
-            <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Analytics & Overview</h2>
+            <h2 style={{ fontSize: '18px', fontWeight: 700 }}>{t.title}</h2>
             <span className="mfe-badge mfe-badge-success">
               <span className="mfe-badge-dot"></span>
-              Port 3001 Live
+              {t.statusLive}
             </span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Maintained autonomously by <strong>Team Alpha</strong>. Listens to real-time events across the MFE network.
+            {t.subtitle}
           </p>
         </div>
 
@@ -68,7 +76,7 @@ export default function DashboardRoutes() {
             onClick={() => setActiveUsers((prev) => prev + 25)}
             title="Local Remote State Update"
           >
-            👥 +25 Users
+            {t.btnUsers}
           </button>
           <button
             type="button"
@@ -76,7 +84,7 @@ export default function DashboardRoutes() {
             onClick={() => setShouldCrash(true)}
             title="Test Fault Isolation"
           >
-            💥 Simulate Outage
+            {t.btnOutage}
           </button>
         </div>
       </div>
@@ -85,35 +93,35 @@ export default function DashboardRoutes() {
       <div className="mfe-grid-3">
         <div className="mfe-stat-card">
           <div className="mfe-stat-header">
-            <span className="mfe-stat-title">Total Revenue</span>
+            <span className="mfe-stat-title">{t.stats.revenueTitle}</span>
             <span className="mfe-stat-icon">💰</span>
           </div>
           <div className="mfe-stat-value" style={{ color: '#34d399' }}>
-            ${revenue.toLocaleString()}
+            {currencyPrefix}{displayRevenue.toLocaleString(locale === 'th' ? 'th-TH' : 'en-US')}
           </div>
-          <div className="mfe-stat-sub">⚡ Live updates on cross-app orders</div>
+          <div className="mfe-stat-sub">{t.stats.revenueSub}</div>
         </div>
 
         <div className="mfe-stat-card">
           <div className="mfe-stat-header">
-            <span className="mfe-stat-title">Processed Orders</span>
+            <span className="mfe-stat-title">{t.stats.ordersTitle}</span>
             <span className="mfe-stat-icon">📦</span>
           </div>
           <div className="mfe-stat-value" style={{ color: '#38bdf8' }}>
-            {ordersCount.toLocaleString()}
+            {ordersCount.toLocaleString(locale === 'th' ? 'th-TH' : 'en-US')}
           </div>
-          <div className="mfe-stat-sub">Synced via window EventBus</div>
+          <div className="mfe-stat-sub">{t.stats.ordersSub}</div>
         </div>
 
         <div className="mfe-stat-card">
           <div className="mfe-stat-header">
-            <span className="mfe-stat-title">Active Users</span>
+            <span className="mfe-stat-title">{t.stats.usersTitle}</span>
             <span className="mfe-stat-icon">🚀</span>
           </div>
           <div className="mfe-stat-value" style={{ color: '#c084fc' }}>
-            {activeUsers.toLocaleString()}
+            {activeUsers.toLocaleString(locale === 'th' ? 'th-TH' : 'en-US')}
           </div>
-          <div className="mfe-stat-sub">Autonomous local state</div>
+          <div className="mfe-stat-sub">{t.stats.usersSub}</div>
         </div>
       </div>
 
@@ -121,10 +129,10 @@ export default function DashboardRoutes() {
       <div className="mfe-card">
         <div className="mfe-card-header">
           <div>
-            <div className="mfe-card-title">📡 Live Activity Feed (Event Subscriber)</div>
-            <div className="mfe-card-subtitle">Subscribed to <code>mfe:order:created</code> events dispatched by Remote Orders (:3002)</div>
+            <div className="mfe-card-title">{t.feed.title}</div>
+            <div className="mfe-card-subtitle">{t.feed.subtitle}</div>
           </div>
-          <span className="mfe-badge mfe-badge-info">Real-time</span>
+          <span className="mfe-badge mfe-badge-info">{t.feed.badge}</span>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

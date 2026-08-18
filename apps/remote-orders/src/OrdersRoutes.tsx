@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
+import { useLocale } from './context/MfeContext';
+import { getOrdersTranslations } from './locales';
 import { eventBus, OrderPayload } from './eventBus';
 import './mfe-styles.css';
 
@@ -27,6 +29,20 @@ function OrdersList({
   onSimulateCrash: () => void;
 }) {
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const t = getOrdersTranslations(locale);
+
+  const currencySymbol = t.currencySymbol;
+  const formatAmount = (usdAmount: number) => {
+    if (locale === 'th') {
+      return `${currencySymbol}${(usdAmount * 35).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `${currencySymbol}${usdAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const getStatusLabel = (status: OrderPayload['status']) => {
+    return t.statuses[status] || status;
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -34,14 +50,14 @@ function OrdersList({
       <div className="mfe-flex-between">
         <div>
           <div className="mfe-flex-gap">
-            <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Orders List</h2>
+            <h2 style={{ fontSize: '18px', fontWeight: 700 }}>{t.list.title}</h2>
             <span className="mfe-badge mfe-badge-purple">
               <span className="mfe-badge-dot"></span>
-              Port 3002
+              {t.list.portBadge}
             </span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-            Internal MFE Routing: <code>/orders</code> &bull; <code>/orders/create</code> &bull; <code>/orders/view/:id</code>
+            {t.list.subRoutes}
           </p>
         </div>
 
@@ -51,7 +67,7 @@ function OrdersList({
             className="mfe-btn mfe-btn-primary mfe-btn-sm"
             onClick={() => navigate('create')}
           >
-            ➕ New Order Form
+            {t.list.btnNewOrder}
           </button>
           <button
             type="button"
@@ -59,7 +75,7 @@ function OrdersList({
             onClick={onQuickCreate}
             title="Emit instant cross-MFE event"
           >
-            ⚡ 1-Click Order
+            {t.list.btnQuickOrder}
           </button>
           <button
             type="button"
@@ -67,7 +83,7 @@ function OrdersList({
             onClick={onSimulateCrash}
             title="Test Fault Isolation"
           >
-            💥 Simulate Outage
+            {t.list.btnOutage}
           </button>
         </div>
       </div>
@@ -78,12 +94,12 @@ function OrdersList({
           <table className="mfe-table">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Purchased Items</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>{t.list.table.orderId}</th>
+                <th>{t.list.table.customer}</th>
+                <th>{t.list.table.items}</th>
+                <th>{t.list.table.total}</th>
+                <th>{t.list.table.status}</th>
+                <th>{t.list.table.action}</th>
               </tr>
             </thead>
             <tbody>
@@ -94,7 +110,7 @@ function OrdersList({
                   </td>
                   <td style={{ fontWeight: 600 }}>{o.customer}</td>
                   <td style={{ color: 'var(--text-secondary)' }}>{o.items}</td>
-                  <td style={{ fontWeight: 700, color: '#34d399' }}>${o.amount.toFixed(2)}</td>
+                  <td style={{ fontWeight: 700, color: '#34d399' }}>{formatAmount(o.amount)}</td>
                   <td>
                     <span
                       className={`mfe-badge ${
@@ -106,7 +122,7 @@ function OrdersList({
                       }`}
                     >
                       <span className="mfe-badge-dot"></span>
-                      {o.status}
+                      {getStatusLabel(o.status)}
                     </span>
                   </td>
                   <td>
@@ -115,7 +131,7 @@ function OrdersList({
                       className="mfe-btn mfe-btn-outline mfe-btn-sm"
                       onClick={() => navigate(`view/${o.orderId}`)}
                     >
-                      View Details ↗
+                      {t.list.table.viewDetails}
                     </button>
                   </td>
                 </tr>
@@ -131,6 +147,9 @@ function OrdersList({
 // --- 2. Create Order Component (/orders/create) ---
 function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void }) {
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const t = getOrdersTranslations(locale);
+
   const [customer, setCustomer] = useState('');
   const [items, setItems] = useState('');
   const [amount, setAmount] = useState('');
@@ -140,11 +159,15 @@ function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void
     e.preventDefault();
     if (!customer.trim() || !items.trim() || !amount) return;
 
+    const rawAmount = parseFloat(amount);
+    // Standardize to USD if input is in THB
+    const normalizedAmount = locale === 'th' ? rawAmount / 35 : rawAmount;
+
     const newOrder: OrderPayload = {
       orderId: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
       customer: customer.trim(),
       items: items.trim(),
-      amount: parseFloat(amount),
+      amount: normalizedAmount,
       status,
       timestamp: Date.now()
     };
@@ -157,26 +180,26 @@ function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '600px' }}>
       <div className="mfe-flex-between">
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Create New Order</h2>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Internal Route: <code>/orders/create</code></p>
+          <h2 style={{ fontSize: '18px', fontWeight: 700 }}>{t.create.title}</h2>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t.create.internalRoute}</p>
         </div>
         <button
           type="button"
           className="mfe-btn mfe-btn-secondary mfe-btn-sm"
           onClick={() => navigate('..')}
         >
-          ← Back to Orders
+          {t.create.backBtn}
         </button>
       </div>
 
       <div className="mfe-card">
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="mfe-form-group">
-            <label className="mfe-label">Customer Name</label>
+            <label className="mfe-label">{t.create.customerLabel}</label>
             <input
               type="text"
               className="mfe-input"
-              placeholder="e.g. Tony Stark"
+              placeholder={t.create.customerPlaceholder}
               value={customer}
               onChange={(e) => setCustomer(e.target.value)}
               required
@@ -184,11 +207,11 @@ function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void
           </div>
 
           <div className="mfe-form-group">
-            <label className="mfe-label">Purchased Items</label>
+            <label className="mfe-label">{t.create.itemsLabel}</label>
             <input
               type="text"
               className="mfe-input"
-              placeholder="e.g. Titanium Flight Thrusters (x2)"
+              placeholder={t.create.itemsPlaceholder}
               value={items}
               onChange={(e) => setItems(e.target.value)}
               required
@@ -197,13 +220,13 @@ function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void
 
           <div className="mfe-grid-2">
             <div className="mfe-form-group">
-              <label className="mfe-label">Amount ($ USD)</label>
+              <label className="mfe-label">{t.create.amountLabel}</label>
               <input
                 type="number"
                 step="0.01"
                 min="1"
                 className="mfe-input"
-                placeholder="499.00"
+                placeholder={locale === 'th' ? '15000.00' : '499.00'}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 required
@@ -211,29 +234,29 @@ function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void
             </div>
 
             <div className="mfe-form-group">
-              <label className="mfe-label">Initial Status</label>
+              <label className="mfe-label">{t.create.statusLabel}</label>
               <select
                 className="mfe-select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as OrderPayload['status'])}
               >
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
+                <option value="processing">{t.statuses.processing}</option>
+                <option value="shipped">{t.statuses.shipped}</option>
+                <option value="delivered">{t.statuses.delivered}</option>
               </select>
             </div>
           </div>
 
           <div className="mfe-flex-gap" style={{ marginTop: '8px' }}>
             <button type="submit" className="mfe-btn mfe-btn-primary">
-              🚀 Submit Order & Broadcast Event
+              {t.create.submitBtn}
             </button>
             <button
               type="button"
               className="mfe-btn mfe-btn-secondary"
               onClick={() => navigate('..')}
             >
-              Cancel
+              {t.create.cancelBtn}
             </button>
           </div>
         </form>
@@ -246,47 +269,58 @@ function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void
 function OrderDetails({ orders }: { orders: OrderPayload[] }) {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const t = getOrdersTranslations(locale);
 
   const order = orders.find((o) => o.orderId === orderId);
 
   if (!order) {
     return (
       <div className="mfe-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f87171' }}>Order Not Found</h3>
+        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f87171' }}>{t.details.notFoundTitle}</h3>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '8px 0 16px' }}>
-          No order exists with ID: <code>{orderId}</code>
+          {t.details.notFoundMsg} <code>{orderId}</code>
         </p>
         <button
           type="button"
           className="mfe-btn mfe-btn-secondary mfe-btn-sm"
           onClick={() => navigate('..')}
         >
-          ← Back to Orders List
+          {t.details.backBtn}
         </button>
       </div>
     );
   }
 
+  const currencySymbol = t.currencySymbol;
+  const displayAmount = locale === 'th'
+    ? `${currencySymbol}${(order.amount * 35).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    : `${currencySymbol}${order.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const getStatusLabel = (status: OrderPayload['status']) => {
+    return t.statuses[status] || status;
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '650px' }}>
       <div className="mfe-flex-between">
         <div>
-          <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Order Details: {order.orderId}</h2>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Internal Route: <code>/orders/view/{order.orderId}</code></p>
+          <h2 style={{ fontSize: '18px', fontWeight: 700 }}>{t.details.titlePrefix} {order.orderId}</h2>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t.details.internalRoute}{order.orderId}</p>
         </div>
         <button
           type="button"
           className="mfe-btn mfe-btn-secondary mfe-btn-sm"
           onClick={() => navigate('..')}
         >
-          ← Back to Orders List
+          {t.details.backBtn}
         </button>
       </div>
 
       <div className="mfe-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div className="mfe-flex-between" style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
           <div>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Customer</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t.details.customer}</span>
             <div style={{ fontSize: '16px', fontWeight: 700 }}>{order.customer}</div>
           </div>
           <span
@@ -299,25 +333,25 @@ function OrderDetails({ orders }: { orders: OrderPayload[] }) {
             }`}
           >
             <span className="mfe-badge-dot"></span>
-            {order.status}
+            {getStatusLabel(order.status)}
           </span>
         </div>
 
         <div className="mfe-grid-2">
           <div>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Purchased Items</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t.details.items}</span>
             <div style={{ fontSize: '14px', fontWeight: 600, marginTop: '2px' }}>{order.items}</div>
           </div>
           <div>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Total Amount</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t.details.totalAmount}</span>
             <div style={{ fontSize: '18px', fontWeight: 800, color: '#34d399', marginTop: '2px' }}>
-              ${order.amount.toFixed(2)}
+              {displayAmount}
             </div>
           </div>
         </div>
 
         <div style={{ fontSize: '12px', color: 'var(--text-muted)', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
-          Created: {new Date(order.timestamp).toLocaleString()} &bull; Dispatched via MFE Event Bus
+          {t.details.created} {new Date(order.timestamp).toLocaleString(locale === 'th' ? 'th-TH' : 'en-US')} &bull; {t.details.dispatchedNote}
         </div>
       </div>
     </div>
@@ -328,10 +362,12 @@ function OrderDetails({ orders }: { orders: OrderPayload[] }) {
 export default function OrdersRoutes() {
   const [orders, setOrders] = useState<OrderPayload[]>(INITIAL_ORDERS);
   const [shouldCrash, setShouldCrash] = useState(false);
+  const { locale } = useLocale();
+  const t = getOrdersTranslations(locale);
 
   // Fault isolation simulation
   if (shouldCrash) {
-    throw new Error('Simulated outage in Orders Remote (Port 3002) to verify Host ErrorBoundary.');
+    throw new Error(t.outageError);
   }
 
   const handleAddOrder = (newOrder: OrderPayload) => {
@@ -355,7 +391,7 @@ export default function OrdersRoutes() {
 
   return (
     <div className="mfe-boundary mfe-boundary-orders" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <span className="mfe-boundary-tag mfe-tag-orders">Team Beta: Orders Remote (:3002)</span>
+      <span className="mfe-boundary-tag mfe-tag-orders">{t.tag}</span>
 
       <Routes>
         <Route index element={<OrdersList orders={orders} onQuickCreate={handleQuickCreate} onSimulateCrash={() => setShouldCrash(true)} />} />

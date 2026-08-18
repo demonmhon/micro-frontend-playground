@@ -1,4 +1,6 @@
 import React, { Suspense, lazy } from 'react';
+import { useLocale } from '../context/MfeContext';
+import { getHostTranslations } from '../locales';
 import { RemoteErrorBoundary } from '../components/RemoteErrorBoundary';
 
 // Dynamic lazy-loading of remote federated micro-apps
@@ -6,6 +8,9 @@ const DashboardRoutes = lazy(() => import('remoteDashboard/DashboardRoutes'));
 const OrdersRoutes = lazy(() => import('remoteOrders/OrdersRoutes'));
 
 export const HomePage: React.FC = () => {
+  const { locale } = useLocale();
+  const t = getHostTranslations(locale);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Top Welcome Banner */}
@@ -24,12 +29,11 @@ export const HomePage: React.FC = () => {
       >
         <div>
           <div className="mfe-flex-gap" style={{ marginBottom: '6px' }}>
-            <h1 style={{ fontSize: '22px', fontWeight: 800 }}>Micro-Frontend Architecture Playground</h1>
-            <span className="mfe-badge mfe-badge-success">Vite + Module Federation</span>
+            <h1 style={{ fontSize: '22px', fontWeight: 800 }}>{t.banner.title}</h1>
+            <span className="mfe-badge mfe-badge-success">{t.banner.tag}</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '13px', maxWidth: '720px' }}>
-            The <strong>Host Shell (:3000)</strong> dynamically aggregates autonomous remote micro-apps over HTTP with <strong>zero shared package dependencies</strong> and pure CSS styling.
-            Click <strong>&quot;➕ New Order Form&quot;</strong> or <strong>&quot;⚡ 1-Click Order&quot;</strong> in Orders Remote to test internal sub-routing and cross-MFE events!
+            {t.banner.description}
           </p>
         </div>
 
@@ -40,7 +44,7 @@ export const HomePage: React.FC = () => {
             rel="noreferrer"
             className="mfe-btn mfe-btn-secondary mfe-btn-sm"
           >
-            ↗ Standalone :3001
+            {t.banner.standaloneDashboard}
           </a>
           <a
             href="http://localhost:3002"
@@ -48,7 +52,7 @@ export const HomePage: React.FC = () => {
             rel="noreferrer"
             className="mfe-btn mfe-btn-secondary mfe-btn-sm"
           >
-            ↗ Standalone :3002
+            {t.banner.standaloneOrders}
           </a>
         </div>
       </div>
@@ -62,7 +66,7 @@ export const HomePage: React.FC = () => {
               fallback={
                 <div className="mfe-card mfe-spinner-wrapper">
                   <div className="mfe-spinner"></div>
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Loading Dashboard Remote (:3001)...</span>
+                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{t.sections.loadingDashboard}</span>
                 </div>
               }
             >
@@ -78,7 +82,7 @@ export const HomePage: React.FC = () => {
               fallback={
                 <div className="mfe-card mfe-spinner-wrapper">
                   <div className="mfe-spinner"></div>
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Loading Orders Remote (:3002)...</span>
+                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{t.sections.loadingOrders}</span>
                 </div>
               }
             >

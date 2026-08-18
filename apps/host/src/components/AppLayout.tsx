@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useLocale } from '../context/MfeContext';
+import { getHostTranslations } from '../locales';
 import { eventBus, NotificationPayload } from '../eventBus';
 
 export interface AppLayoutProps {
@@ -7,6 +9,9 @@ export interface AppLayoutProps {
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+  const { locale, setLocale } = useLocale();
+  const t = getHostTranslations(locale);
+
   const [inspectMode, setInspectMode] = useState(false);
   const [notifications, setNotifications] = useState<NotificationPayload[]>([
     {
@@ -34,8 +39,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     const unsubscribeOrder = eventBus.onOrder((order) => {
       const newNotif: NotificationPayload = {
         id: `ord-${order.orderId}-${Date.now()}`,
-        title: `New Order: #${order.orderId}`,
-        message: `${order.customer} placed order for $${order.amount.toFixed(2)} (${order.items})`,
+        title: `${t.notifications.newOrderPrefix} #${order.orderId}`,
+        message: `${order.customer} ${t.notifications.placedOrder} $${order.amount.toFixed(2)} (${order.items})`,
         type: 'success',
         timestamp: Date.now()
       };
@@ -52,13 +57,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       unsubscribeOrder();
       unsubscribeCustomNotif();
     };
-  }, []);
+  }, [t]);
 
   const handleSimulateHostBroadcast = () => {
     eventBus.emitNotification({
       id: `host-${Date.now()}`,
-      title: 'Broadcast from Host Shell',
-      message: 'Host Shell (:3000) broadcasted an event across all federated remotes.',
+      title: t.notifications.broadcastTitle,
+      message: t.notifications.broadcastMessage,
       type: 'info',
       timestamp: Date.now()
     });
@@ -74,30 +79,62 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <NavLink to="/" className="header-brand">
             <span className="brand-icon">⚡</span>
             <div className="brand-text">
-              <span className="brand-title">MFE Playground</span>
-              <span className="brand-subtitle">Vite + Module Federation</span>
+              <span className="brand-title">{t.brandTitle}</span>
+              <span className="brand-subtitle">{t.brandSubtitle}</span>
             </div>
           </NavLink>
 
           <nav className="header-nav">
             <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-              Overview
+              {t.nav.overview}
             </NavLink>
             <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               <span className="nav-dot" style={{ backgroundColor: '#10b981' }}></span>
-              Dashboard (:3001)
+              {t.nav.dashboard}
             </NavLink>
             <NavLink to="/orders" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
               <span className="nav-dot" style={{ backgroundColor: '#a855f7' }}></span>
-              Orders (:3002)
+              {t.nav.orders}
             </NavLink>
             <NavLink to="/docs" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-              Architecture Docs
+              {t.nav.docs}
             </NavLink>
           </nav>
         </div>
 
         <div className="header-right">
+          {/* Language Switcher */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'var(--bg-surface)',
+              padding: '3px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              gap: '2px'
+            }}
+          >
+            <button
+              type="button"
+              className={`mfe-btn mfe-btn-sm ${locale === 'en' ? 'mfe-btn-primary' : 'mfe-btn-outline'}`}
+              style={{ padding: '3px 8px', fontSize: '11px', border: 'none' }}
+              onClick={() => setLocale('en')}
+              title="English"
+            >
+              🇺🇸 EN
+            </button>
+            <button
+              type="button"
+              className={`mfe-btn mfe-btn-sm ${locale === 'th' ? 'mfe-btn-primary' : 'mfe-btn-outline'}`}
+              style={{ padding: '3px 8px', fontSize: '11px', border: 'none' }}
+              onClick={() => setLocale('th')}
+              title="ภาษาไทย"
+            >
+              🇹🇭 TH
+            </button>
+          </div>
+
           {/* Inspect MFE Toggle */}
           <button
             type="button"
@@ -105,7 +142,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             onClick={toggleInspectMode}
             title="Toggle visual boundary boxes"
           >
-            {inspectMode ? '🔍 Inspect Active' : '🔍 Inspect MFEs'}
+            {inspectMode ? t.actions.inspectActive : t.actions.inspectMfe}
           </button>
 
           {/* Test Event Button */}
@@ -115,7 +152,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             onClick={handleSimulateHostBroadcast}
             title="Dispatch test event"
           >
-            📡 Emit Event
+            {t.actions.emitEvent}
           </button>
 
           {/* Notification Bell */}
@@ -132,13 +169,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             {showNotifMenu && (
               <div className="notif-dropdown mfe-card">
                 <div className="mfe-flex-between" style={{ paddingBottom: '10px', borderBottom: '1px solid var(--border-color)' }}>
-                  <strong>Event Stream ({notifications.length})</strong>
+                  <strong>{t.actions.eventStream} ({notifications.length})</strong>
                   <button
                     type="button"
                     className="mfe-btn mfe-btn-outline mfe-btn-sm"
                     onClick={() => setNotifications([])}
                   >
-                    Clear
+                    {t.actions.clear}
                   </button>
                 </div>
                 <div className="notif-list">
@@ -147,7 +184,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                       <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)' }}>{n.title}</div>
                       <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>{n.message}</div>
                       <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        {new Date(n.timestamp).toLocaleTimeString()}
+                        {new Date(n.timestamp).toLocaleTimeString(locale === 'th' ? 'th-TH' : 'en-US')}
                       </div>
                     </div>
                   ))}
@@ -167,7 +204,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       <footer className="shell-event-bar">
         <div className="event-bar-label">
           <span className="live-pulse"></span>
-          <span>Cross-MFE Bus:</span>
+          <span>{t.ticker.label}</span>
         </div>
         <div className="event-bar-content">{latestEventMsg}</div>
         <div className="event-bar-ports">
