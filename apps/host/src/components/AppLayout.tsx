@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useLocale } from '../context/MfeContext';
+import { useLocale, useTheme } from '../context/MfeContext';
 import { getHostTranslations } from '../locales';
 import { eventBus, NotificationPayload } from '../eventBus';
 
@@ -10,6 +10,7 @@ export interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { locale, setLocale } = useLocale();
+  const { theme, setTheme } = useTheme();
   const t = getHostTranslations(locale);
 
   const [inspectMode, setInspectMode] = useState(false);
@@ -103,6 +104,38 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         </div>
 
         <div className="header-right">
+          {/* Theme Switcher */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'var(--bg-surface)',
+              padding: '3px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              gap: '2px'
+            }}
+          >
+            <button
+              type="button"
+              className={`mfe-btn mfe-btn-sm ${theme === 'dark' ? 'mfe-btn-primary' : 'mfe-btn-outline'}`}
+              style={{ padding: '3px 8px', fontSize: '11px', border: 'none' }}
+              onClick={() => setTheme('dark')}
+              title="Dark Theme"
+            >
+              {t.actions.themeDark}
+            </button>
+            <button
+              type="button"
+              className={`mfe-btn mfe-btn-sm ${theme === 'light' ? 'mfe-btn-primary' : 'mfe-btn-outline'}`}
+              style={{ padding: '3px 8px', fontSize: '11px', border: 'none' }}
+              onClick={() => setTheme('light')}
+              title="Light Theme"
+            >
+              {t.actions.themeLight}
+            </button>
+          </div>
+
           {/* Language Switcher */}
           <div
             style={{

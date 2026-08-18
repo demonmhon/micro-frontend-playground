@@ -1,15 +1,20 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type SupportedLocale = 'en' | 'th';
+export type SupportedTheme = 'dark' | 'light';
 
 export interface MfeContextValue {
   locale: SupportedLocale;
   setLocale: (locale: SupportedLocale) => void;
+  theme: SupportedTheme;
+  setTheme: (theme: SupportedTheme) => void;
 }
 
 export const defaultMfeContextValue: MfeContextValue = {
   locale: 'en',
-  setLocale: () => {}
+  setLocale: () => {},
+  theme: 'dark',
+  setTheme: () => {}
 };
 
 // Guarantee singleton Context instance across independently bundled federated remotes
@@ -21,22 +26,44 @@ export const MfeContext: React.Context<MfeContextValue> =
 export interface MfeProviderProps {
   children: ReactNode;
   initialLocale?: SupportedLocale;
+  initialTheme?: SupportedTheme;
   value?: MfeContextValue;
 }
 
-export const MfeProvider: React.FC<MfeProviderProps> = ({ children, initialLocale = 'en', value }) => {
+export const MfeProvider: React.FC<MfeProviderProps> = ({
+  children,
+  initialLocale = 'en',
+  initialTheme = 'dark',
+  value
+}) => {
   const [locale, setLocale] = useState<SupportedLocale>(initialLocale);
+  const [theme, setTheme] = useState<SupportedTheme>(initialTheme);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const activeTheme = value ? value.theme : theme;
+      document.documentElement.setAttribute('data-theme', activeTheme);
+    }
+  }, [theme, value]);
 
   const contextValue: MfeContextValue = value || {
     locale,
-    setLocale
+    setLocale,
+    theme,
+    setTheme
   };
 
   return <MfeContext.Provider value={contextValue}>{children}</MfeContext.Provider>;
 };
 
 export const useMfe = (): MfeContextValue => useContext(MfeContext);
+
 export const useLocale = () => {
   const { locale, setLocale } = useMfe();
   return { locale, setLocale };
+};
+
+export const useTheme = () => {
+  const { theme, setTheme } = useMfe();
+  return { theme, setTheme };
 };

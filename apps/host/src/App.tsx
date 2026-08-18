@@ -77,7 +77,7 @@ function AppRoutes() {
 
 export function App() {
   return (
-    <MfeProvider initialLocale="en">
+    <MfeProvider initialLocale="en" initialTheme="dark">
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>

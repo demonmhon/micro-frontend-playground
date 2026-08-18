@@ -16,7 +16,9 @@ export const hostTranslations = {
       emitEvent: '📡 Emit Event',
       clear: 'Clear',
       eventStream: 'Event Stream',
-      langLabel: 'Language'
+      langLabel: 'Language',
+      themeDark: '🌙 Dark',
+      themeLight: '☀️ Light'
     },
     banner: {
       title: 'Micro-Frontend Architecture Playground',
@@ -64,7 +66,9 @@ export const hostTranslations = {
       emitEvent: '📡 ส่งอีเวนต์ทดสอบ',
       clear: 'ล้างข้อมูล',
       eventStream: 'สตรีมข้อความอีเวนต์',
-      langLabel: 'ภาษา'
+      langLabel: 'ภาษา',
+      themeDark: '🌙 โหมดมืด',
+      themeLight: '☀️ โหมดสว่าง'
     },
     banner: {
       title: 'สนามทดลองสถาปัตยกรรม Micro-Frontend',

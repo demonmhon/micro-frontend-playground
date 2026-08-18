@@ -1,11 +1,12 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { MfeProvider, useLocale } from './context/MfeContext';
+import { MfeProvider, useLocale, useTheme } from './context/MfeContext';
 import OrdersRoutes from './OrdersRoutes';
 import './mfe-styles.css';
 
 function StandaloneOrdersShell() {
   const { locale, setLocale } = useLocale();
+  const { theme, setTheme } = useTheme();
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '24px' }}>
@@ -34,7 +35,37 @@ function StandaloneOrdersShell() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Standalone Theme Switcher */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: 'var(--bg-surface)',
+                padding: '2px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-color)',
+                gap: '2px'
+              }}
+            >
+              <button
+                type="button"
+                className={`mfe-btn mfe-btn-sm ${theme === 'dark' ? 'mfe-btn-primary' : 'mfe-btn-outline'}`}
+                style={{ padding: '2px 6px', fontSize: '11px', border: 'none' }}
+                onClick={() => setTheme('dark')}
+              >
+                🌙
+              </button>
+              <button
+                type="button"
+                className={`mfe-btn mfe-btn-sm ${theme === 'light' ? 'mfe-btn-primary' : 'mfe-btn-outline'}`}
+                style={{ padding: '2px 6px', fontSize: '11px', border: 'none' }}
+                onClick={() => setTheme('light')}
+              >
+                ☀️
+              </button>
+            </div>
+
             {/* Standalone Locale Switcher */}
             <div
               style={{
@@ -83,7 +114,7 @@ function StandaloneOrdersShell() {
 
 export function App() {
   return (
-    <MfeProvider initialLocale="en">
+    <MfeProvider initialLocale="en" initialTheme="dark">
       <BrowserRouter>
         <StandaloneOrdersShell />
       </BrowserRouter>
