@@ -8,6 +8,11 @@ export const dashboardTranslations = {
     subtitle: 'Maintained autonomously by Team Alpha. Listens to real-time events across the MFE network.',
     btnUsers: '👥 +25 Users',
     btnOutage: '💥 Simulate Outage',
+    config: {
+      endpointLabel: 'API Target:',
+      mockActive: 'Mock Mode',
+      liveActive: 'Live API'
+    },
     stats: {
       revenueTitle: 'Total Revenue',
       revenueSub: '⚡ Live updates on cross-app orders',
@@ -34,6 +39,11 @@ export const dashboardTranslations = {
     subtitle: 'ดูแลอย่างอิสระโดยทีมแอลฟ่า รับฟังอีเวนต์แบบเรียลไทม์ผ่านเครือข่าย MFE',
     btnUsers: '👥 +25 ผู้ใช้',
     btnOutage: '💥 จำลองระบบล่ม',
+    config: {
+      endpointLabel: 'ปลายทาง API:',
+      mockActive: 'โหมดจำลอง Mock',
+      liveActive: 'เชื่อมต่อ API จริง'
+    },
     stats: {
       revenueTitle: 'รายได้รวมทั้งหมด',
       revenueSub: '⚡ อัปเดตสดเมื่อมีคำสั่งซื้อข้ามแอป',

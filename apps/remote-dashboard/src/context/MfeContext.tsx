@@ -2,19 +2,36 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 export type SupportedLocale = 'en' | 'th';
 export type SupportedTheme = 'dark' | 'light';
+export type SupportedEnvironment = 'development' | 'staging' | 'production';
+
+export interface MfeGlobalConfig {
+  apiBaseUrl: string;
+  environment: SupportedEnvironment;
+  mockMode: boolean;
+}
 
 export interface MfeContextValue {
   locale: SupportedLocale;
   setLocale: (locale: SupportedLocale) => void;
   theme: SupportedTheme;
   setTheme: (theme: SupportedTheme) => void;
+  config: MfeGlobalConfig;
+  updateConfig: (patch: Partial<MfeGlobalConfig>) => void;
 }
+
+export const defaultMfeGlobalConfig: MfeGlobalConfig = {
+  apiBaseUrl: 'http://localhost:8080/api/v1',
+  environment: 'development',
+  mockMode: true
+};
 
 export const defaultMfeContextValue: MfeContextValue = {
   locale: 'en',
   setLocale: () => {},
   theme: 'dark',
-  setTheme: () => {}
+  setTheme: () => {},
+  config: defaultMfeGlobalConfig,
+  updateConfig: () => {}
 };
 
 // Guarantee singleton Context instance across independently bundled federated remotes
@@ -27,6 +44,7 @@ export interface MfeProviderProps {
   children: ReactNode;
   initialLocale?: SupportedLocale;
   initialTheme?: SupportedTheme;
+  initialConfig?: Partial<MfeGlobalConfig>;
   value?: MfeContextValue;
 }
 
@@ -34,10 +52,15 @@ export const MfeProvider: React.FC<MfeProviderProps> = ({
   children,
   initialLocale = 'en',
   initialTheme = 'dark',
+  initialConfig,
   value
 }) => {
   const [locale, setLocale] = useState<SupportedLocale>(initialLocale);
   const [theme, setTheme] = useState<SupportedTheme>(initialTheme);
+  const [config, setConfig] = useState<MfeGlobalConfig>({
+    ...defaultMfeGlobalConfig,
+    ...initialConfig
+  });
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -46,11 +69,17 @@ export const MfeProvider: React.FC<MfeProviderProps> = ({
     }
   }, [theme, value]);
 
+  const updateConfig = (patch: Partial<MfeGlobalConfig>) => {
+    setConfig((prev) => ({ ...prev, ...patch }));
+  };
+
   const contextValue: MfeContextValue = value || {
     locale,
     setLocale,
     theme,
-    setTheme
+    setTheme,
+    config,
+    updateConfig
   };
 
   return <MfeContext.Provider value={contextValue}>{children}</MfeContext.Provider>;
@@ -66,4 +95,9 @@ export const useLocale = () => {
 export const useTheme = () => {
   const { theme, setTheme } = useMfe();
   return { theme, setTheme };
+};
+
+export const useMfeConfig = () => {
+  const { config, updateConfig } = useMfe();
+  return { config, updateConfig };
 };

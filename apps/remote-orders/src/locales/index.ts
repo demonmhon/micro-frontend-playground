@@ -4,6 +4,11 @@ export const ordersTranslations = {
   en: {
     tag: 'Team Beta: Orders Remote (:3002)',
     currencySymbol: '$',
+    config: {
+      endpointLabel: 'API Target:',
+      mockActive: 'Mock Mode',
+      liveActive: 'Live API'
+    },
     list: {
       title: 'Orders List',
       portBadge: 'Port 3002',
@@ -56,6 +61,11 @@ export const ordersTranslations = {
   th: {
     tag: 'ทีมบีต้า: จัดการคำสั่งซื้อ MFE (:3002)',
     currencySymbol: '฿',
+    config: {
+      endpointLabel: 'ปลายทาง API:',
+      mockActive: 'โหมดจำลอง Mock',
+      liveActive: 'เชื่อมต่อ API จริง'
+    },
     list: {
       title: 'รายการคำสั่งซื้อ',
       portBadge: 'พอร์ต 3002',

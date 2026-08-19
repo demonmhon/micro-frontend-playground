@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
-import { useLocale } from './context/MfeContext';
+import { useLocale, useMfeConfig } from './context/MfeContext';
 import { getOrdersTranslations } from './locales';
 import { eventBus, OrderPayload } from './eventBus';
 import './mfe-styles.css';
@@ -30,6 +30,7 @@ function OrdersList({
 }) {
   const navigate = useNavigate();
   const { locale } = useLocale();
+  const { config } = useMfeConfig();
   const t = getOrdersTranslations(locale);
 
   const currencySymbol = t.currencySymbol;
@@ -47,13 +48,17 @@ function OrdersList({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       {/* Action Header */}
-      <div className="mfe-flex-between">
+      <div className="mfe-flex-between" style={{ flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <div className="mfe-flex-gap">
+          <div className="mfe-flex-gap" style={{ flexWrap: 'wrap' }}>
             <h2 style={{ fontSize: '18px', fontWeight: 700 }}>{t.list.title}</h2>
             <span className="mfe-badge mfe-badge-purple">
               <span className="mfe-badge-dot"></span>
               {t.list.portBadge}
+            </span>
+            <span className="mfe-badge mfe-badge-neutral" style={{ fontSize: '11px' }}>
+              <span className="mfe-badge-dot"></span>
+              {t.config.endpointLabel} <code>{config.apiBaseUrl}/orders</code> ({config.mockMode ? t.config.mockActive : t.config.liveActive})
             </span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -148,6 +153,7 @@ function OrdersList({
 function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void }) {
   const navigate = useNavigate();
   const { locale } = useLocale();
+  const { config } = useMfeConfig();
   const t = getOrdersTranslations(locale);
 
   const [customer, setCustomer] = useState('');
@@ -181,7 +187,9 @@ function CreateOrder({ onAddOrder }: { onAddOrder: (order: OrderPayload) => void
       <div className="mfe-flex-between">
         <div>
           <h2 style={{ fontSize: '18px', fontWeight: 700 }}>{t.create.title}</h2>
-          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{t.create.internalRoute}</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+            {t.create.internalRoute} &bull; <code>POST {config.apiBaseUrl}/orders</code> ({config.mockMode ? t.config.mockActive : t.config.liveActive})
+          </p>
         </div>
         <button
           type="button"
@@ -270,6 +278,7 @@ function OrderDetails({ orders }: { orders: OrderPayload[] }) {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { locale } = useLocale();
+  const { config } = useMfeConfig();
   const t = getOrdersTranslations(locale);
 
   const order = orders.find((o) => o.orderId === orderId);
@@ -351,7 +360,7 @@ function OrderDetails({ orders }: { orders: OrderPayload[] }) {
         </div>
 
         <div style={{ fontSize: '12px', color: 'var(--text-muted)', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
-          {t.details.created} {new Date(order.timestamp).toLocaleString(locale === 'th' ? 'th-TH' : 'en-US')} &bull; {t.details.dispatchedNote}
+          {t.details.created} {new Date(order.timestamp).toLocaleString(locale === 'th' ? 'th-TH' : 'en-US')} &bull; <code>GET {config.apiBaseUrl}/orders/{order.orderId}</code>
         </div>
       </div>
     </div>

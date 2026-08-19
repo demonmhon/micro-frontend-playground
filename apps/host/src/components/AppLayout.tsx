@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useLocale, useTheme } from '../context/MfeContext';
 import { getHostTranslations } from '../locales';
 import { eventBus, NotificationPayload } from '../eventBus';
+import { GlobalConfigModal } from './GlobalConfigModal';
 
 export interface AppLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const t = getHostTranslations(locale);
 
   const [inspectMode, setInspectMode] = useState(false);
+  const [showConfigModal, setShowConfigModal] = useState(false);
   const [notifications, setNotifications] = useState<NotificationPayload[]>([
     {
       id: 'init-1',
@@ -168,6 +170,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </button>
           </div>
 
+          {/* Global Config Manager */}
+          <button
+            type="button"
+            className="mfe-btn mfe-btn-secondary mfe-btn-sm"
+            onClick={() => setShowConfigModal(true)}
+            title="Global Configuration & Base URL"
+          >
+            {t.actions.configBtn}
+          </button>
+
           {/* Inspect MFE Toggle */}
           <button
             type="button"
@@ -246,6 +258,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <span className="port-tag" style={{ color: '#a855f7' }}>Team Beta :3002</span>
         </div>
       </footer>
+
+      {/* Global Config Modal */}
+      <GlobalConfigModal isOpen={showConfigModal} onClose={() => setShowConfigModal(false)} />
     </div>
   );
 };

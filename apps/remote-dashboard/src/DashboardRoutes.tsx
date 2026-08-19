@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocale } from './context/MfeContext';
+import { useLocale, useMfeConfig } from './context/MfeContext';
 import { getDashboardTranslations } from './locales';
 import { eventBus, OrderPayload } from './eventBus';
 import './mfe-styles.css';
@@ -13,6 +13,7 @@ interface ActivityItem {
 
 export default function DashboardRoutes() {
   const { locale } = useLocale();
+  const { config } = useMfeConfig();
   const t = getDashboardTranslations(locale);
 
   const [revenue, setRevenue] = useState(148250);
@@ -57,11 +58,15 @@ export default function DashboardRoutes() {
       {/* Header Bar */}
       <div className="mfe-flex-between" style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
         <div>
-          <div className="mfe-flex-gap">
+          <div className="mfe-flex-gap" style={{ flexWrap: 'wrap' }}>
             <h2 style={{ fontSize: '18px', fontWeight: 700 }}>{t.title}</h2>
             <span className="mfe-badge mfe-badge-success">
               <span className="mfe-badge-dot"></span>
               {t.statusLive}
+            </span>
+            <span className="mfe-badge mfe-badge-neutral" style={{ fontSize: '11px' }}>
+              <span className="mfe-badge-dot"></span>
+              {t.config.endpointLabel} <code>{config.apiBaseUrl}/analytics</code> ({config.mockMode ? t.config.mockActive : t.config.liveActive})
             </span>
           </div>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
